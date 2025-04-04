@@ -1,0 +1,11 @@
+node_modules
+dist
+.DS_Store
+.idea
+.vscode
+*.log
+example/.astro
+example/dist
+example/node_modules
+.smart-links-routes.json
+example/.smart-links-routes.json 

@@ -1,0 +1,198 @@
+/* 下划线动画 */
+.underline-animation {
+  position: relative;
+  text-decoration: none;
+  color: oklch(var(--p));
+}
+.underline-animation::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  bottom: -2px;
+  left: 0;
+  background-color: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+.underline-animation:hover::after {
+  transform: scaleX(1);
+}
+
+/* 边框高亮 */
+.border-highlight {
+  text-decoration: none;
+  border-bottom: 1px dashed oklch(var(--a));
+  padding: 0 4px;
+  transition:
+    background-color 0.2s,
+    border-color 0.2s;
+}
+.border-highlight:hover {
+  background-color: oklch(var(--a) / 0.1);
+  border-bottom: 1px solid oklch(var(--a));
+}
+
+/* 断开链接警告样式 */
+.warning-link {
+  text-decoration: none;
+  color: oklch(var(--a));
+  background: linear-gradient(to right, transparent 50%, oklch(var(--a) / 0.1) 50%);
+  background-size: 200% 100%;
+  background-position: 0 0;
+  transition:
+    background-position 0.3s,
+    color 0.3s;
+  padding: 0 4px;
+  border-radius: 2px;
+}
+.warning-link:hover {
+  background-position: -100% 0;
+  text-decoration: line-through;
+}
+
+/* 工具提示 */
+.tooltip-link {
+  position: relative;
+  text-decoration: none;
+  color: oklch(var(--s));
+  border-bottom: 1px dotted;
+}
+.tooltip-link::before {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 5px 10px;
+  background-color: oklch(var(--b) / 0.8);
+  color: oklch(var(--bc));
+  border-radius: 4px;
+  font-size: 0.8rem;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.3s,
+    visibility 0.3s;
+  white-space: nowrap;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+  pointer-events: none;
+}
+.tooltip-link:hover::before {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* 带工具提示的链接 */
+[data-tooltip] {
+  position: relative;
+}
+
+[data-tooltip]::before {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 5px 10px;
+  background-color: oklch(var(--n) / 0.8);
+  color: oklch(var(--nc));
+  border-radius: 4px;
+  font-size: 0.8rem;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.3s,
+    visibility 0.3s;
+  white-space: nowrap;
+  z-index: 10;
+  pointer-events: none;
+}
+
+[data-tooltip]:hover::before {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* 发光效果 */
+.glow-on-hover {
+  position: relative;
+  text-decoration: none;
+  color: oklch(var(--p));
+  padding: 0 4px;
+  transition: color 0.3s;
+  z-index: 1;
+}
+
+.glow-on-hover::before {
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: oklch(var(--p) / 0);
+  border-radius: 4px;
+  z-index: -1;
+  transition: background 0.3s;
+}
+
+.glow-on-hover:hover {
+  color: oklch(var(--pc));
+}
+
+.glow-on-hover:hover::before {
+  background: oklch(var(--p));
+  box-shadow: 0 0 15px oklch(var(--p) / 0.5);
+}
+
+/* 滑动边框效果 */
+.sliding-border {
+  position: relative;
+  text-decoration: none;
+  color: oklch(var(--s));
+  padding: 0 4px;
+}
+
+.sliding-border::after {
+  content: "";
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: -2px;
+  left: 0;
+  background: linear-gradient(90deg, oklch(var(--s)), oklch(var(--a)));
+  transition: width 0.3s ease-in-out;
+}
+
+.sliding-border:hover::after {
+  width: 100%;
+}
+
+/* 摇晃效果 */
+.shake-effect {
+  position: relative;
+  text-decoration: none;
+  color: oklch(var(--er));
+  padding: 0 4px;
+}
+
+.shake-effect:hover {
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20%,
+  60% {
+    transform: translateX(-2px);
+  }
+  40%,
+  80% {
+    transform: translateX(2px);
+  }
+}

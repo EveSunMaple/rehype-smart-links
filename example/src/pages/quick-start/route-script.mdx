@@ -1,0 +1,118 @@
+import Layout from '../../layouts/Layout.astro'
+import PageNavigation from '../../components/PageNavigation.astro'
+
+<Layout title="路由脚本" description="自动生成路由文件以支持rehype-smart-links" activeTab="route-script">
+
+# 自动化路由生成
+
+rehype-smart-links 需要知道你站点中的有效路由，以便正确识别断开的链接。本教程将介绍如何使用内置命令行工具生成路由映射文件，并在配置中正确使用它。
+
+## 为什么需要路由文件？
+
+当 rehype-smart-links 处理你的 Markdown 内容时，它需要验证内部链接是否指向有效页面。为了实现这一点，插件需要获取你站点中所有有效路由的列表。通过自动生成这个列表，你可以：
+
+1. 确保内部链接正确高亮
+2. 标识出断开的链接
+3. 防止用户访问不存在的页面
+
+## 使用命令行工具生成路由
+
+rehype-smart-links 提供了一个内置的命令行工具，使路由生成过程变得简单。
+
+### 设置构建命令
+
+在你的 `package.json` 中添加以下脚本：
+
+```json
+{
+  "scripts": {
+    "build:with-routes": "astro build && rehype-smart-links build && astro build"
+  }
+}
+```
+
+这个命令会：
+1. 首先构建你的站点
+2. 扫描构建输出目录并生成路由文件
+3. 使用生成的路由信息再次构建站点
+
+### 配置路由文件路径
+
+默认情况下，CLI 工具会在项目根目录生成 `.smart-links-routes.json` 文件。**请确保在 rehype-smart-links 配置中使用相同的路径**：
+
+```js
+// astro.config.mjs
+import { defineConfig } from 'astro/config';
+import rehypeSmartLinks from 'rehype-smart-links';
+
+export default defineConfig({
+  markdown: {
+    rehypePlugins: [[rehypeSmartLinks, {
+      // 此路径必须与 CLI 工具生成的文件路径一致
+      routesFile: './.smart-links-routes.json',
+      // 其他配置...
+    }]]
+  }
+});
+```
+
+> **重要提示：** 如果在 CLI 中使用了自定义输出路径 (`--output` 选项)，请确保在插件配置中的 `routesFile` 设置为相同的路径，否则插件将无法找到正确的路由信息。
+
+### 自定义 CLI 选项
+
+CLI 工具支持多种配置选项：
+
+```
+选项：
+  -d, --dir <path>        构建目录路径 (默认: "./dist")
+  -o, --output <path>     路由文件的输出路径 (默认: "./.smart-links-routes.json")
+  -a, --all               包含所有文件类型 (默认: false)
+  -e, --extensions <ext>  要包含的文件扩展名 (默认: ["html"])
+  -h, --help              显示帮助信息
+```
+
+例如，包含更多文件类型：
+
+```bash
+# 生成包含所有文件的路由图
+rehype-smart-links build --all
+
+# 指定特定文件类型
+rehype-smart-links build --extensions html md pdf
+
+# 自定义输出路径（记得在插件配置中使用相同路径）
+rehype-smart-links build --output ./src/routes.json
+```
+
+### 在 CI/CD 环境中使用
+
+在 Vercel、Netlify 等托管服务中，你可以修改构建命令：
+
+```bash
+# Vercel 或 Netlify 构建命令
+npm run build:with-routes
+```
+
+## 与其他构建工具集成
+
+rehype-smart-links 的路由生成可以与任何构建工具结合使用：
+
+```bash
+# Vite 项目
+vite build && rehype-smart-links build --dir dist && vite build
+
+# 11ty 项目
+eleventy && rehype-smart-links build --dir _site && eleventy
+```
+
+## 故障排除
+
+如果你的链接没有正确识别，请检查：
+
+1. 路由文件是否成功生成（检查项目根目录或自定义路径）
+2. 插件配置中的 `routesFile` 路径是否与生成的文件路径匹配
+3. 构建目录（`--dir`）是否正确设置为你的构建输出目录
+
+<PageNavigation currentPath="/quick-start/route-script" />
+
+</Layout> 

@@ -1,7 +1,7 @@
 {
   "name": "rehype-smart-links",
   "type": "module",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A rehype plugin for Astro that adds different styling for internal and external links",
   "author": "EveSunMaple",
   "license": "MIT",

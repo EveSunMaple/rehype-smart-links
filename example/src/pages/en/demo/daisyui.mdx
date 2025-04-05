@@ -31,11 +31,9 @@ export default defineConfig({
     rehypePlugins: [[
       rehypeSmartLinks, 
       {
-        className: {
-          internal: 'badge badge-primary',
-          external: 'badge badge-secondary',
-          broken: 'badge badge-error'
-        }
+        internalLinkClass: 'badge badge-primary',
+        externalLinkClass: 'badge badge-secondary',
+        brokenLinkClass: 'badge badge-error'
       }
     ]]
   }
@@ -66,11 +64,9 @@ export default defineConfig({
     rehypePlugins: [[
       rehypeSmartLinks, 
       {
-        className: {
-          internal: 'btn btn-primary btn-sm',
-          external: 'btn btn-secondary btn-sm',
-          broken: 'btn btn-error btn-sm'
-        }
+        internalLinkClass: 'btn btn-primary btn-sm',
+        externalLinkClass: 'btn btn-secondary btn-sm',
+        brokenLinkClass: 'btn btn-error btn-sm'
       }
     ]]
   }
@@ -101,11 +97,9 @@ export default defineConfig({
     rehypePlugins: [[
       rehypeSmartLinks, 
       {
-        className: {
-          internal: 'link link-primary',
-          external: 'link link-secondary',
-          broken: 'link link-error'
-        }
+        internalLinkClass: 'link link-primary',
+        externalLinkClass: 'link link-secondary',
+        brokenLinkClass: 'link link-error'
       }
     ]]
   }

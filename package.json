@@ -5,6 +5,12 @@
   "description": "A rehype plugin for Astro that adds different styling for internal and external links",
   "author": "evesunmaple",
   "license": "MIT",
+  "homepage": "https://rehype-smart-links.vercel.app/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/EveSunMaple/rehype-smart-links"
+  },
+  "bugs": "https://github.com/EveSunMaple/rehype-smart-links/issues",
   "keywords": [
     "rehype",
     "rehype-plugin",

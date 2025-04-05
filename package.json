@@ -3,7 +3,7 @@
   "type": "module",
   "version": "0.1.0",
   "description": "A rehype plugin for Astro that adds different styling for internal and external links",
-  "author": "evesunmaple",
+  "author": "EveSunMaple",
   "license": "MIT",
   "homepage": "https://rehype-smart-links.vercel.app/",
   "repository": {
@@ -17,7 +17,10 @@
     "astro",
     "astro-integration",
     "links",
-    "external-links"
+    "external-links",
+    "markdown",
+    "html",
+    "smart-links"
   ],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -25,8 +28,14 @@
     "rehype-smart-links": "dist/cli.js"
   },
   "files": [
+    "LICENSE",
+    "README.md",
+    "README.zh-CN.md",
     "dist"
   ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "build": "tsup src/index.ts src/cli.ts --format esm --dts",
     "dev": "tsup src/index.ts src/cli.ts --format esm --dts --watch",

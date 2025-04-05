@@ -1,21 +1,33 @@
+import type { TestCase } from "../cases/testCases";
 import fs from "node:fs";
+
 import path from "node:path";
+
 import * as cheerio from "cheerio";
 import rehypeParse from "rehype-parse";
 import rehypeSmartLinks from "rehype-smart-links";
+import rehypeStringify from "rehype-stringify";
 import { unified } from "unified";
 
 export interface TestResult {
   id: string;
   title: string;
   status: "success" | "failure" | "error";
-  config: string;
-  expectedInternal: string;
-  expectedExternal: string;
-  expectedBroken: string;
+  description?: string;
+  // Test input
+  internalLinkHtml: string;
+  externalLinkHtml: string;
+  brokenLinkHtml: string;
+  // Expected output
+  expectedInternalLinkHtml: string;
+  expectedExternalLinkHtml: string;
+  expectedBrokenLinkHtml: string;
+  // Actual output
   actualInternal?: string;
   actualExternal?: string;
   actualBroken?: string;
+  // Config
+  pluginConfig: Record<string, any>;
   error?: string;
 }
 
@@ -23,49 +35,45 @@ export interface TestResult {
  * 运行测试用例
  * @param testCase 测试用例对象
  */
-export async function runTest(testCase: {
-  id: string;
-  title: string;
-  config: string;
-  internalLinkHtml: string;
-  externalLinkHtml: string;
-  brokenLinkHtml: string;
-}): Promise<TestResult> {
+export async function runTest(testCase: TestCase): Promise<TestResult> {
   // 基本测试结果
   const result: TestResult = {
     id: testCase.id,
     title: testCase.title,
     status: "error",
-    config: testCase.config,
-    expectedInternal: testCase.internalLinkHtml,
-    expectedExternal: testCase.externalLinkHtml,
-    expectedBroken: testCase.brokenLinkHtml,
+    description: testCase.description,
+    // Test input
+    internalLinkHtml: testCase.internalLinkHtml,
+    externalLinkHtml: testCase.externalLinkHtml,
+    brokenLinkHtml: testCase.brokenLinkHtml,
+    // Expected output
+    expectedInternalLinkHtml: testCase.expectedInternalLinkHtml,
+    expectedExternalLinkHtml: testCase.expectedExternalLinkHtml,
+    expectedBrokenLinkHtml: testCase.expectedBrokenLinkHtml,
+    // Config
+    pluginConfig: testCase.pluginConfig,
   };
 
   try {
-    // 解析配置
-    const configCode = cleanConfigCode(testCase.config);
-    const pluginConfig = extractPluginConfig(configCode);
-
     // 创建测试HTML
     const testHtml = `
       <html>
         <body>
-          <div id="internal-container"><a href="/internal-link">Internal Link</a></div>
-          <div id="external-container"><a href="https://example.com">External Link</a></div>
-          <div id="broken-container"><a href="/broken-link">Broken Link</a></div>
+          <div id="internal-container">${testCase.internalLinkHtml}</div>
+          <div id="external-container">${testCase.externalLinkHtml}</div>
+          <div id="broken-container">${testCase.brokenLinkHtml}</div>
         </body>
       </html>
     `;
 
     try {
-      // 从处理后的HTML中提取链接
-      // 处理 unified() 的类型问题，使用 await 等待处理完成
-      const processor = unified()
-        .use(rehypeParse as any)
-        .use(rehypeSmartLinks, pluginConfig);
+      const file = await unified()
+        .use(rehypeParse)
+        .use(rehypeSmartLinks, testCase.pluginConfig)
+        .use(rehypeStringify)
+        .process(testHtml);
 
-      const processedHtml = await processor.process(testHtml).then(file => String(file));
+      const processedHtml = String(file);
       const processedLinks = extractLinks(processedHtml);
 
       result.actualInternal = processedLinks.internal;
@@ -74,9 +82,9 @@ export async function runTest(testCase: {
 
       // 检查结果是否匹配预期
       if (
-        compareHTML(result.actualInternal, result.expectedInternal)
-        && compareHTML(result.actualExternal, result.expectedExternal)
-        && compareHTML(result.actualBroken, result.expectedBroken)
+        compareHTML(result.actualInternal, result.expectedInternalLinkHtml)
+        && compareHTML(result.actualExternal, result.expectedExternalLinkHtml)
+        && compareHTML(result.actualBroken, result.expectedBrokenLinkHtml)
       ) {
         result.status = "success";
       }
@@ -97,55 +105,6 @@ export async function runTest(testCase: {
   }
 
   return result;
-}
-
-/**
- * 清理配置代码
- * @param code 配置代码
- * @returns 清理后的代码
- */
-function cleanConfigCode(code: string): string {
-  // 从配置代码中提取实际配置对象
-  return code
-    .replace(/\/\/.*/g, "") // 移除注释
-    .replace(/\/\*[\s\S]*?\*\//g, "") // 移除多行注释
-    .trim();
-}
-
-/**
- * 从配置代码中提取插件配置
- * @param code 配置代码
- * @returns 插件配置对象
- */
-function extractPluginConfig(code: string): Record<string, any> {
-  try {
-    // 查找 rehypeSmartLinks 配置对象
-    const configMatch = code.match(/rehypeSmartLinks,\s*(\{[\s\S]*?\})/);
-
-    if (configMatch && configMatch[1]) {
-      // 尝试将配置字符串转换为对象
-      // 注意：这是一个简化实现，实际上应该使用更安全的方法
-      // 例如使用 babel 转换 AST
-      const configStr = configMatch[1]
-        .replace(/(\w+):/g, "\"$1\":") // 为属性名添加引号
-        .replace(/'/g, "\""); // 将单引号替换为双引号
-
-      try {
-        return JSON.parse(configStr);
-      }
-      catch {
-        // 如果无法解析，返回空对象
-        return {};
-      }
-    }
-
-    // 如果没找到配置，返回空对象
-    return {};
-  }
-  catch {
-    // 捕获错误但不输出
-    return {};
-  }
 }
 
 /**
@@ -182,7 +141,7 @@ function compareHTML(actual: string, expected: string): boolean {
  */
 export function generateHTMLReport(results: TestResult[], outputPath: string): void {
   const statusEmoji = {
-    success: "✅",
+    success: "✔️",
     failure: "⚠️",
     error: "❎",
   };
@@ -275,6 +234,9 @@ export function generateHTMLReport(results: TestResult[], outputPath: string): v
       background-color: #f5f5f5;
       border-radius: 5px;
     }
+    .config-container {
+      margin-top: 15px;
+    }
   </style>
 </head>
 <body>
@@ -284,15 +246,15 @@ export function generateHTMLReport(results: TestResult[], outputPath: string): v
     <h2>Summary</h2>
     <p>
       Total Tests: ${results.length} | 
-      Passed: ${results.filter(r => r.status === "success").length} ✅ | 
-      Failed: ${results.filter(r => r.status === "failure").length} ⚠️ | 
-      Errors: ${results.filter(r => r.status === "error").length} ❎
+      Passed: ${results.filter((r) => r.status === "success").length} ✔️ | 
+      Failed: ${results.filter((r) => r.status === "failure").length} ⚠️ | 
+      Errors: ${results.filter((r) => r.status === "error").length} ❎
     </p>
   </div>
 
   <h2>Test Results</h2>
   
-  ${results.map(result => `
+  ${results.map((result) => `
     <div class="test-card">
       <div class="test-header">
         <div class="test-title">${result.title}</div>
@@ -301,8 +263,10 @@ export function generateHTMLReport(results: TestResult[], outputPath: string): v
         </div>
       </div>
       <div class="test-body">
+        ${result.description ? `<p>${escapeHTML(result.description)}</p>` : ""}
+        
         <h3>Plugin Configuration</h3>
-        <pre class="code-block">${escapeHTML(result.config)}</pre>
+        <pre class="code-block">${escapeHTML(JSON.stringify(result.pluginConfig, null, 2))}</pre>
         
         ${result.error
           ? `
@@ -315,10 +279,10 @@ export function generateHTMLReport(results: TestResult[], outputPath: string): v
           <div class="comparison">
             <div>
               <div class="comparison-header">Expected:</div>
-              <pre class="code-block">${escapeHTML(result.expectedInternal)}</pre>
+              <pre class="code-block">${escapeHTML(result.expectedInternalLinkHtml)}</pre>
               <div class="link-preview">
                 <div class="link-preview-header">Rendered Preview:</div>
-                ${result.expectedInternal}
+                ${result.expectedInternalLinkHtml}
               </div>
             </div>
             <div>
@@ -335,10 +299,10 @@ export function generateHTMLReport(results: TestResult[], outputPath: string): v
           <div class="comparison">
             <div>
               <div class="comparison-header">Expected:</div>
-              <pre class="code-block">${escapeHTML(result.expectedExternal)}</pre>
+              <pre class="code-block">${escapeHTML(result.expectedExternalLinkHtml)}</pre>
               <div class="link-preview">
                 <div class="link-preview-header">Rendered Preview:</div>
-                ${result.expectedExternal}
+                ${result.expectedExternalLinkHtml}
               </div>
             </div>
             <div>
@@ -355,10 +319,10 @@ export function generateHTMLReport(results: TestResult[], outputPath: string): v
           <div class="comparison">
             <div>
               <div class="comparison-header">Expected:</div>
-              <pre class="code-block">${escapeHTML(result.expectedBroken)}</pre>
+              <pre class="code-block">${escapeHTML(result.expectedBrokenLinkHtml)}</pre>
               <div class="link-preview">
                 <div class="link-preview-header">Rendered Preview:</div>
-                ${result.expectedBroken}
+                ${result.expectedBrokenLinkHtml}
               </div>
             </div>
             <div>

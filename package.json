@@ -1,7 +1,7 @@
 {
   "name": "rehype-smart-links",
   "type": "module",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A rehype plugin for Astro that adds different styling for internal and external links",
   "author": "EveSunMaple",
   "license": "MIT",
@@ -46,6 +46,7 @@
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "test": "vitest run",
+    "test:dev": "node tests/serve-report.js",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
     "prepublishOnly": "pnpm build"
@@ -67,6 +68,7 @@
     "eslint-plugin-import": "^2.31.0",
     "globals": "^16.0.0",
     "hast-util-is-element": "^3.0.0",
+    "hastscript": "^9.0.1",
     "rehype-parse": "^9.0.1",
     "rehype-remark": "^10.0.1",
     "rehype-smart-links": "^0.2.0",

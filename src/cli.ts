@@ -20,7 +20,7 @@ const program = new Command();
 program
   .name("rehype-smart-links")
   .description("CLI utility for rehype-smart-links")
-  .version("0.2.0");
+  .version("0.3.0");
 
 program
   .command("build")

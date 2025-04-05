@@ -29,11 +29,9 @@ export default defineConfig({
     rehypePlugins: [[
       rehypeSmartLinks, 
       {
-        className: {
-          internal: 'text-blue-600 hover:text-blue-800 underline',
-          external: 'text-purple-600 hover:text-purple-800 underline',
-          broken: 'text-red-600 hover:text-red-800 line-through'
-        }
+        internalLinkClass: 'text-blue-600 hover:text-blue-800 underline',
+        externalLinkClass: 'text-purple-600 hover:text-purple-800 underline',
+        brokenLinkClass: 'text-red-600 hover:text-red-800 line-through'
       }
     ]]
   }
@@ -62,11 +60,9 @@ export default defineConfig({
     rehypePlugins: [[
       rehypeSmartLinks, 
       {
-        className: {
-          internal: 'inline-flex items-center px-3 py-1 text-sm rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors duration-200',
-          external: 'inline-flex items-center px-3 py-1 text-sm rounded-full bg-purple-100 text-purple-700 hover:bg-purple-200 transition-colors duration-200',
-          broken: 'inline-flex items-center px-3 py-1 text-sm rounded-full bg-red-100 text-red-700 line-through opacity-75 cursor-not-allowed'
-        }
+        internalLinkClass: 'inline-flex items-center px-3 py-1 text-sm rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors duration-200',
+        externalLinkClass: 'inline-flex items-center px-3 py-1 text-sm rounded-full bg-purple-100 text-purple-700 hover:bg-purple-200 transition-colors duration-200',
+        brokenLinkClass: 'inline-flex items-center px-3 py-1 text-sm rounded-full bg-red-100 text-red-700 line-through opacity-75 cursor-not-allowed'
       }
     ]]
   }

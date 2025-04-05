@@ -2,6 +2,7 @@
 
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
+import process from "node:process";
 
 import { Command } from "commander";
 
@@ -19,7 +20,7 @@ const program = new Command();
 program
   .name("rehype-smart-links")
   .description("CLI utility for rehype-smart-links")
-  .version("0.1.0");
+  .version("0.2.0");
 
 program
   .command("build")

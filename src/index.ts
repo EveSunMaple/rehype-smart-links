@@ -115,12 +115,12 @@ function scanDirectoryForRoutes(
   options: RehypeSmartLinksOptions = defaultOptions,
 ): Set<string> {
   if (!existsSync(dir)) {
-    console.log(`${colors.yellow}[WARNING]${colors.reset} Directory not found: ${colors.bold}${dir}${colors.reset}`);
+    console.warn(`${colors.yellow}[WARNING]${colors.reset} Directory not found: ${colors.bold}${dir}${colors.reset}`);
     return routes;
   }
 
   const entries = readdirSync(dir, { withFileTypes: true });
-  console.log(`${colors.dim}[SCAN]${colors.reset} Scanning directory: ${colors.bold}${dir}${colors.reset} (${entries.length} entries)`);
+  console.warn(`${colors.dim}[SCAN]${colors.reset} Scanning directory: ${colors.bold}${dir}${colors.reset} (${entries.length} entries)`);
 
   for (const entry of entries) {
     const fullPath = join(dir, entry.name);
@@ -130,7 +130,7 @@ function scanDirectoryForRoutes(
       // Add the directory as a route (for directory index)
       const dirRoute = normalizePath(relativePath);
       routes.add(dirRoute);
-      console.log(`${colors.blue}[DIR]${colors.reset} Added directory route: ${colors.bold}${dirRoute}${colors.reset}`);
+      console.warn(`${colors.blue}[DIR]${colors.reset} Added directory route: ${colors.bold}${dirRoute}${colors.reset}`);
 
       // Recursively scan subdirectories
       scanDirectoryForRoutes(fullPath, relativePath, routes, options);
@@ -158,10 +158,10 @@ function scanDirectoryForRoutes(
 
         const normalizedRoute = normalizePath(route);
         routes.add(normalizedRoute);
-        console.log(`${colors.green}[FILE]${colors.reset} Added route: ${colors.bold}${normalizedRoute}${colors.reset} (${extension})`);
+        console.warn(`${colors.green}[FILE]${colors.reset} Added route: ${colors.bold}${normalizedRoute}${colors.reset} (${extension})`);
       }
       else {
-        console.log(`${colors.dim}[SKIP]${colors.reset} Skipped file: ${colors.dim}${relativePath}${colors.reset} (${extension})`);
+        console.warn(`${colors.dim}[SKIP]${colors.reset} Skipped file: ${colors.dim}${relativePath}${colors.reset} (${extension})`);
       }
     }
   }
@@ -180,8 +180,8 @@ export function generateRoutesFile(
   routesFilePath: string = "./.smart-links-routes.json",
   options: RehypeSmartLinksOptions = {},
 ): void {
-  console.log(`${colors.cyan}[INFO]${colors.reset} ${colors.bold}Smart Links Route Generation${colors.reset}`);
-  console.log(`${colors.cyan}[INFO]${colors.reset} Scanning build directory: ${colors.bold}${buildDir}${colors.reset}`);
+  console.warn(`${colors.cyan}[INFO]${colors.reset} ${colors.bold}Smart Links Route Generation${colors.reset}`);
+  console.warn(`${colors.cyan}[INFO]${colors.reset} Scanning build directory: ${colors.bold}${buildDir}${colors.reset}`);
 
   const scanOptions = {
     ...defaultOptions,
@@ -189,9 +189,9 @@ export function generateRoutesFile(
   };
 
   // Log scan settings
-  console.log(`${colors.cyan}[CONFIG]${colors.reset} Include all files: ${colors.bold}${scanOptions.includeAllFiles ? "Yes" : "No"}${colors.reset}`);
+  console.warn(`${colors.cyan}[CONFIG]${colors.reset} Include all files: ${colors.bold}${scanOptions.includeAllFiles ? "Yes" : "No"}${colors.reset}`);
   if (!scanOptions.includeAllFiles && scanOptions.includeFileExtensions) {
-    console.log(`${colors.cyan}[CONFIG]${colors.reset} Included extensions: ${colors.bold}${scanOptions.includeFileExtensions.join(", ")}${colors.reset}`);
+    console.warn(`${colors.cyan}[CONFIG]${colors.reset} Included extensions: ${colors.bold}${scanOptions.includeFileExtensions.join(", ")}${colors.reset}`);
   }
 
   const routes = scanDirectoryForRoutes(buildDir, "", new Set(), scanOptions);
@@ -199,13 +199,13 @@ export function generateRoutesFile(
   // Always ensure '/' route is included
   routes.add("index");
   routes.add("");
-  console.log(`${colors.blue}[ROUTE]${colors.reset} Added default route: ${colors.bold}/${colors.reset}`);
+  console.warn(`${colors.blue}[ROUTE]${colors.reset} Added default route: ${colors.bold}/${colors.reset}`);
 
-  console.log(`${colors.cyan}[SUMMARY]${colors.reset} Found ${colors.bold}${routes.size}${colors.reset} routes in the build directory`);
+  console.warn(`${colors.cyan}[SUMMARY]${colors.reset} Found ${colors.bold}${routes.size}${colors.reset} routes in the build directory`);
 
   try {
     writeFileSync(routesFilePath, JSON.stringify(Array.from(routes), null, 2));
-    console.log(`${colors.green}[SUCCESS]${colors.reset} Routes file generated: ${colors.bold}${routesFilePath}${colors.reset}`);
+    console.warn(`${colors.green}[SUCCESS]${colors.reset} Routes file generated: ${colors.bold}${routesFilePath}${colors.reset}`);
   }
   catch (error) {
     console.error(`${colors.red}[ERROR]${colors.reset} Failed to write routes file: ${colors.bold}${error instanceof Error ? error.message : String(error)}${colors.reset}`);
@@ -225,7 +225,7 @@ function loadRoutesFromFile(routesFilePath: string): Set<string> {
   routes.add("");
 
   if (!existsSync(routesFilePath)) {
-    console.log(`${colors.yellow}[WARNING]${colors.reset} Routes file not found: ${colors.bold}${routesFilePath}${colors.reset}`);
+    console.warn(`${colors.yellow}[WARNING]${colors.reset} Routes file not found: ${colors.bold}${routesFilePath}${colors.reset}`);
     return routes;
   }
 
@@ -250,7 +250,6 @@ function loadRoutesFromFile(routesFilePath: string): Set<string> {
  * @param type Link type
  * @param className Class name to apply
  * @param options Plugin options
- * @returns Modified element
  */
 function processLinkNode(
   node: Element,
@@ -283,8 +282,7 @@ export default function rehypeSmartLinks(options: RehypeSmartLinksOptions = {}) 
 
   return (tree: Root, file: VFile) => {
     // Get the site URL and routes from Astro if available
-    const siteUrl = (file.data?.site as any)?.url || "";
-    const siteHostname = siteUrl ? new URL(siteUrl).hostname : "";
+    const _siteUrl = (file.data?.site as any)?.url || "";
 
     // Try to collect all available routes
     const availableRoutes = new Set<string>();
@@ -300,14 +298,18 @@ export default function rehypeSmartLinks(options: RehypeSmartLinksOptions = {}) 
     // 2. If routes are not available from Astro, try loading from routes file
     if (availableRoutes.size === 0) {
       const routesFromFile = loadRoutesFromFile(opts.routesFile || defaultOptions.routesFile!);
-      routesFromFile.forEach((route) => availableRoutes.add(route));
+      routesFromFile.forEach((route) => {
+        availableRoutes.add(route);
+      });
     }
 
     // 3. If still no routes found, try to scan the build directory directly
     if (availableRoutes.size === 0) {
-      console.log(`${colors.yellow}[WARNING]${colors.reset} No routes found. Consider running generateRoutesFile() before building.`);
+      console.warn(`${colors.yellow}[WARNING]${colors.reset} No routes found. Consider running generateRoutesFile() before building.`);
       const scannedRoutes = scanDirectoryForRoutes(opts.publicDir || defaultOptions.publicDir!, "", new Set(), opts);
-      scannedRoutes.forEach((route) => availableRoutes.add(route));
+      scannedRoutes.forEach((route) => {
+        availableRoutes.add(route);
+      });
     }
 
     visit(tree, "element", (node: Element) => {
@@ -390,7 +392,7 @@ export default function rehypeSmartLinks(options: RehypeSmartLinksOptions = {}) 
                   || existsSync(`${publicPath}.html`)
                   || existsSync(join(publicPath, "index.html"));
               }
-              catch (error) {
+              catch {
                 // Ignore errors and continue
               }
             }

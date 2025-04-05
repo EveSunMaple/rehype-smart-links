@@ -401,6 +401,41 @@ const tailwindWrapper = (node, type, className) => {
 };
 ```
 
-## 许可证
+## 测试
 
-MIT
+该插件包含一个全面的测试套件，以确保功能按预期工作。
+
+### 运行测试
+
+```bash
+# 首先安装依赖
+npm install
+
+# 运行测试
+npm test
+```
+
+### 添加测试用例
+
+如果你遇到问题或想添加新的测试用例：
+
+1. 按照现有模式向 `tests/cases/testCases.ts` 添加新的测试用例。
+
+2. 运行测试以验证你的测试用例：
+
+```bash
+npm test
+```
+
+3. 测试报告将生成在 `tests/results/report.html`，其中包含预期输出和实际输出的可视化比较。
+
+### 报告问题
+
+如果你发现bug或有功能请求，请[提交issue](https://github.com/yourusername/rehype-smart-links/issues)，并包含：
+
+1. 问题的清晰描述
+2. 复现步骤（最好是一个失败的测试用例）
+3. 预期行为与实际行为的比较
+4. rehype-smart-links和你的环境的版本信息
+
+欢迎提交Pull Request！

@@ -401,6 +401,41 @@ const tailwindWrapper = (node, type, className) => {
 };
 ```
 
-## License
+## Testing
 
-MIT
+This plugin includes a comprehensive test suite to ensure functionality works as expected.
+
+### Running Tests
+
+```bash
+# Install dependencies first
+npm install
+
+# Run the tests
+npm test
+```
+
+### Adding Test Cases
+
+If you're experiencing an issue or want to add a new test case:
+
+1. Add a new test case to `tests/cases/testCases.ts` following the existing pattern.
+
+2. Run the tests to verify your test case:
+
+```bash
+npm test
+```
+
+3. The test report will be generated at `tests/results/report.html` with visual comparison between expected and actual outputs.
+
+### Reporting Issues
+
+If you find a bug or have a feature request, please [open an issue](https://github.com/yourusername/rehype-smart-links/issues) with:
+
+1. A clear description of the problem
+2. Steps to reproduce (or ideally, a test case that fails)
+3. Expected vs. actual behavior
+4. Version information for rehype-smart-links and your environment
+
+Pull requests are always welcome!
